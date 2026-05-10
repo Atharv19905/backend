@@ -195,16 +195,16 @@ Please login to the system to view details.
         }
 
 
-        await sendEmail(
-            faculty.email,
-            `New Task Assigned: ${task.title}`,
-            message,
-            attachments
-        )
-
-        res.json({
-            message: "Task assigned successfully"
-        })
+        try {
+    await sendEmail(
+        faculty.email,
+        `New Task Assigned: ${task.title}`,
+        message,
+        attachments
+    )
+} catch (mailErr) {
+    console.error("Email failed:", mailErr.message)
+}
 
     } catch (err) {
 
