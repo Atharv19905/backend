@@ -196,7 +196,7 @@ Please login to the system to view details.
 
 
         try {
-    await sendEmail(
+     sendEmail(
         faculty.email,
         `New Task Assigned: ${task.title}`,
         message,
@@ -414,7 +414,7 @@ router.put("/reassign", verifyToken, async (req, res) => {
 
         if (error) throw error
 
-        await sendEmail(
+         sendEmail(
             newFaculty.email,
             "Task Reassigned to You",
             `Hello ${newFaculty.name},
