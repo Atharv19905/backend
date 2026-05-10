@@ -1,41 +1,44 @@
 const nodemailer = require("nodemailer");
-const fs = require("fs");
 
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
     port: 587,
+
     auth: {
-        user: process.env.BREVO_LOGIN,      // from Brevo SMTP
-        pass: process.env.BREVO_SMTP_KEY    // SMTP key (NOT API key)
-    }
+        user: process.env.BREVO_LOGIN,
+        pass: process.env.BREVO_SMTP_KEY
+    },
+
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000
 });
 
 const sendEmail = async (to, subject, text, attachments = []) => {
 
     try {
 
-        // Convert attachments (same as nodemailer format)
         const formattedAttachments = attachments.map(file => ({
             filename: file.filename,
             path: file.path
         }));
 
         await transporter.sendMail({
-            from: '"System" <atharvpchougule19@gmail.com>', // verified sender
+            from: '"System" <atharvpchougule19@gmail.com>',
             to,
             subject,
             text,
             attachments: formattedAttachments
         });
 
+        console.log("✅ Email sent");
 
     } catch (err) {
 
         console.error("❌ Email error:", err.message);
-        throw err;
 
+        return null; // ✅ IMPORTANT
     }
-
 };
 
 module.exports = sendEmail;
