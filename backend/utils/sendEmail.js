@@ -1,43 +1,36 @@
-const nodemailer = require("nodemailer");
+const brevo = require("@getbrevo/brevo");
 
-const transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
+const apiInstance = new brevo.TransactionalEmailsApi();
 
-    auth: {
-        user: process.env.BREVO_LOGIN,
-        pass: process.env.BREVO_SMTP_KEY
-    },
-
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000
-});
+apiInstance.setApiKey(
+    brevo.TransactionalEmailsApiApiKeys.apiKey,
+    process.env.BREVO_API_KEY
+);
 
 const sendEmail = async (to, subject, text, attachments = []) => {
 
     try {
 
-        const formattedAttachments = attachments.map(file => ({
-            filename: file.filename,
-            path: file.path
-        }));
+        const email = new brevo.SendSmtpEmail();
 
-        await transporter.sendMail({
-            from: '"System" <atharvpchougule19@gmail.com>',
-            to,
-            subject,
-            text,
-            attachments: formattedAttachments
-        });
+        email.sender = {
+            name: "System",
+            email: "atharvpchougule19@gmail.com"
+        };
+
+        email.to = [{ email: to }];
+        email.subject = subject;
+        email.textContent = text;
+
+        await apiInstance.sendTransacEmail(email);
 
         console.log("✅ Email sent");
 
     } catch (err) {
 
-        console.error("❌ Email error:", err.message);
+        console.log("❌ Email error:", err.message);
 
-        return null; // ✅ IMPORTANT
+        return null;
     }
 };
 
