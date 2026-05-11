@@ -205,7 +205,9 @@ Please login to the system to view details.
 } catch (mailErr) {
     console.error("Email failed:", mailErr.message)
 }
-
+res.json({
+    message: "Task assigned successfully"
+})
     } catch (err) {
 
         res.status(500).json({
