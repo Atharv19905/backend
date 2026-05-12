@@ -19,8 +19,19 @@ const sendEmail = async (to, subject, text, attachments = []) => {
         };
 
         email.to = [{ email: to }];
+
         email.subject = subject;
+
         email.textContent = text;
+
+        // ✅ Attachments support
+        if (attachments.length > 0) {
+
+            email.attachment = attachments.map(file => ({
+                name: file.filename,
+                url: file.path
+            }));
+        }
 
         await apiInstance.sendTransacEmail(email);
 
