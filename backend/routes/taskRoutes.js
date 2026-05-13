@@ -218,7 +218,57 @@ res.json({
 
 })
 
+router.delete("/delete/:id", verifyToken, async (req, res) => {
 
+    try {
+
+        const { id } = req.params;
+
+        // verify ownership
+        const { data: task, error: fetchError } = await supabase
+            .from("tasks")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (fetchError || !task) {
+            return res.status(404).json({
+                message: "Task not found"
+            });
+        }
+
+        // only creator can delete
+        if (task.assigned_by !== req.user.id) {
+            return res.status(403).json({
+                message: "Unauthorized"
+            });
+        }
+
+        // delete assignments first
+        await supabase
+            .from("task_assignments")
+            .delete()
+            .eq("task_id", id);
+
+        // delete task
+        const { error } = await supabase
+            .from("tasks")
+            .delete()
+            .eq("id", id);
+
+        if (error) throw error;
+
+        res.json({
+            message: "Task deleted successfully"
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            error: err.message
+        });
+    }
+});
 router.get("/file/:name", verifyToken, async (req, res) => {
     try {
         const { name } = req.params
