@@ -461,7 +461,7 @@ router.put("/reassign", verifyToken, async (req, res) => {
         const { data: task } = await supabase
             .from("tasks")
             .select("*")
-            .eq("id", task_id)
+            .eq("id", assignment.task_id)
             .single()
         
         const { data: newFaculty } = await supabase
