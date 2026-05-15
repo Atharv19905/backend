@@ -181,7 +181,7 @@ router.post("/assign", verifyToken, async (req, res) => {
             .single()
 
 
-        const message = `
+       const message = `
 Hello ${faculty.name},
 
 A new task has been assigned to you.
@@ -196,6 +196,7 @@ ${task.note ? `Note: ${task.note}` : ""}
 ${task.tags?.length ? `Tags: ${task.tags.join(", ")}` : ""}
 
 Please login to the system to view details.
+`
 `
         `
 
