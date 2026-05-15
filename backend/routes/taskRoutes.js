@@ -197,7 +197,7 @@ ${task.tags?.length ? `Tags: ${task.tags.join(", ")}` : ""}
 
 Please login to the system to view details.
 `
-        `
+        
 
         let attachments = []
 
