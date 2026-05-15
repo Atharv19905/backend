@@ -381,7 +381,7 @@ router.put("/reassign", verifyToken, async (req, res) => {
 
     try {
 
-        const { assignment_id, new_faculty_id, due_date } = req.body
+        const { assignment_id, new_faculty_id, due_date, reason } = req.body
 
         if (!assignment_id || !new_faculty_id) {
             return res.status(400).json({
@@ -458,6 +458,12 @@ router.put("/reassign", verifyToken, async (req, res) => {
                 .eq("organization_id", req.user.organization_id)
         }
 
+        const { data: task } = await supabase
+            .from("tasks")
+            .select("*")
+            .eq("id", task_id)
+            .single()
+        
         const { data: newFaculty } = await supabase
             .from("users")
             .select("email,name")
@@ -472,6 +478,12 @@ router.put("/reassign", verifyToken, async (req, res) => {
             `Hello ${newFaculty.name},
 
 A task has been reassigned to you.
+Title: ${task.title}
+Description: ${task.description}
+Priority: ${task.priority}
+Due Date: ${new Date(task.due_date).toLocaleDateString()}
+
+Reason for reassignment: ${reason}
 
 Please check your dashboard.
 
