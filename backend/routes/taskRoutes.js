@@ -23,7 +23,7 @@ router.post("/create", verifyToken, upload.single("document"), async (req, res) 
 
     try {
 
-        const { title, description, priority, due_date, visibility } = req.body
+        const { title, description, priority, due_date, visibility,tags,note } = req.body
 
         if (!title || !due_date) {
             return res.status(400).json({
@@ -50,20 +50,40 @@ router.post("/create", verifyToken, upload.single("document"), async (req, res) 
             documentPath = fileName
         }
 
+        let finalTags = tags
+    ? tags
+        .split(",")
+        .map(t => t.trim().toLowerCase())
+        .filter(Boolean)
+    : []
+
+// auto add personal tag
+if (visibility === "private") {
+    finalTags.push("#personal")
+}
+
+// remove duplicates
+finalTags = [...new Set(finalTags)]
+        
         const { data, error } = await supabase
             .from("tasks")
             .insert([{
-                title,
-                description,
-                assigned_by: req.user.id,
-                priority,
-                due_date,
-                visibility: visibility || "private",
-                document: documentPath,
-                organization_id: req.user.organization_id,
-                department_id: req.user.department_id,
-                created_at: new Date()
-            }])
+    title,
+    description,
+    assigned_by: req.user.id,
+    priority,
+    due_date,
+    visibility: visibility || "private",
+    document: documentPath,
+
+    // NEW
+    tags: finalTags,
+    note: note || "",
+
+    organization_id: req.user.organization_id,
+    department_id: req.user.department_id,
+    created_at: new Date()
+}])
             .select()
             .single()
 
@@ -171,7 +191,12 @@ Description: ${task.description}
 Priority: ${task.priority}
 Due Date: ${new Date(task.due_date).toLocaleDateString()}
 
+${task.note ? `Note: ${task.note}` : ""}
+
+${task.tags?.length ? `Tags: ${task.tags.join(", ")}` : ""}
+
 Please login to the system to view details.
+`
         `
 
         let attachments = []
@@ -647,6 +672,7 @@ router.get("/mytasks", verifyToken, async (req, res) => {
 
     try {
 
+        const { search } = req.query
 
         const { data, error } = await supabase
             .from("task_assignments")
@@ -660,7 +686,50 @@ router.get("/mytasks", verifyToken, async (req, res) => {
 
         if (error) throw error
 
-        res.json(data)
+        let filtered = data || []
+
+        if (search && search.trim()) {
+
+            const q = search.toLowerCase()
+
+            filtered = filtered.filter((t) => {
+
+                const task = t.tasks || {}
+
+                const tags = task.tags || []
+
+                return (
+
+                    // tag match
+                    tags.some(tag =>
+                        tag.toLowerCase().includes(q)
+                    )
+
+                    ||
+
+                    // title
+                    task.title?.toLowerCase().includes(q)
+
+                    ||
+
+                    // description
+                    task.description?.toLowerCase().includes(q)
+
+                    ||
+
+                    // note
+                    task.note?.toLowerCase().includes(q)
+
+                    ||
+
+                    // visibility quick search
+                    (q === "#personal" &&
+                        task.visibility === "private")
+                )
+            })
+        }
+
+        res.json(filtered)
 
     } catch (err) {
 
@@ -671,7 +740,6 @@ router.get("/mytasks", verifyToken, async (req, res) => {
     }
 
 })
-
 
 // Productivity analytics
 router.get("/productivity", verifyToken, async (req, res) => {
