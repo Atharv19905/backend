@@ -22,7 +22,7 @@ const sendEmail = async (to, subject, text, attachments = []) => {
 
         email.subject = subject;
 
-        email.textContent = text;
+        email.htmlContent = text;
 
         // ✅ Attachments support
         if (attachments.length > 0) {
