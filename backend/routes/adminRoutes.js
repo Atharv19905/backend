@@ -110,7 +110,7 @@ router.post("/approve/:id", verifyToken, verifyAdmin, async (req, res) => {
 Your account has been approved.
 
 Login here:
-http://localhost:5173/login`
+https://tasknexus-eight.vercel.app/login`
     );
 
     res.json({
