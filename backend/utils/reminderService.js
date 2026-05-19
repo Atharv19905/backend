@@ -4,11 +4,11 @@ async function sendBulkReminder(task, sender, hours) {
 
     console.log("send reminder hit")
 
-    let color = "#facc15" // yellow default
+    let color = "#fb923c" // yellow default
     let badge = "24 HOURS LEFT"
 
     if (hours >= 48) {
-        color = "#fb923c"
+        color = "#facc15"
         badge = "48 HOURS LEFT"
     }
 
